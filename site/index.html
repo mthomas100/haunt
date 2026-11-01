@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HAUNT · Point your phone at someone. Know who they are.</title>
+<meta name="description" content="Opt-in face recognition for events, running entirely on the phone. No app, one link. Top 3 at the Stranger Builds Halloween Hackathon 2026.">
+<meta name="theme-color" content="#0b0a10">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mthomas100.github.io/haunt/">
+<meta property="og:title" content="HAUNT · Point your phone at someone. Know who they are.">
+<meta property="og:description" content="Opt-in, on-device face recognition for events. No app, one link. 🏆 Top 3 at Stranger Builds 2026.">
+<meta property="og:image" content="https://mthomas100.github.io/haunt/og.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://mthomas100.github.io/haunt/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0a10; --panel: #16141f; --panel2: #1f1c2b; --line: #2a2738;
+    --ink: #ece7f5; --mute: #9a93ad; --accent: #ff6a00; --ok: #7cff6b; --glow: #b14cff;
+    --gold: #ffb02e; --gold-ink: #ffd27a;
+    --radius: 18px; --max: 1120px;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 17px/1.6 "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(900px 520px at 50% -120px, rgba(177, 76, 255, .28), transparent 70%),
+      radial-gradient(700px 500px at 85% 40%, rgba(255, 106, 0, .08), transparent 70%),
+      radial-gradient(600px 500px at 10% 75%, rgba(177, 76, 255, .10), transparent 70%);
+  }
+  a { color: inherit; }
+  img, video { display: block; max-width: 100%; }
+  .wrap { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 16px; }
+  @media (min-width: 720px) { .wrap { padding: 0 28px; } }
+  .accent { color: var(--accent); }
+  .glowtxt { color: #d9b8ff; }
+
+  /* nav */
+  header.nav {
+    position: sticky; top: 0; z-index: 20;
+    backdrop-filter: saturate(140%) blur(14px); -webkit-backdrop-filter: saturate(140%) blur(14px);
+    background: rgba(11, 10, 16, .72); border-bottom: 1px solid rgba(42, 39, 56, .7);
+  }
+  .nav .wrap { display: flex; align-items: center; gap: 20px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 900; letter-spacing: .02em; text-decoration: none; font-size: 19px; }
+  .brand span { font-size: 24px; filter: drop-shadow(0 0 10px rgba(177, 76, 255, .7)); }
+  .nav nav { display: none; gap: 22px; margin-left: auto; }
+  .nav nav a { color: var(--mute); text-decoration: none; font-weight: 500; font-size: 15px; }
+  .nav nav a:hover { color: var(--ink); }
+  .nav .cta-small { margin-left: auto; }
+  @media (min-width: 860px) { .nav nav { display: flex; } .nav .cta-small { margin-left: 0; } }
+
+  /* buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 14px 22px; border-radius: 999px; font-weight: 700; font-size: 16px; text-decoration: none;
+    border: 1px solid transparent; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    font-family: inherit; line-height: 1;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary { background: var(--accent); color: #140a02; box-shadow: 0 8px 30px rgba(255, 106, 0, .35); }
+  .btn.primary:hover { box-shadow: 0 10px 38px rgba(255, 106, 0, .5); }
+  .btn.ghost { background: rgba(31, 28, 43, .7); border-color: var(--line); color: var(--ink); }
+  .btn.ghost:hover { border-color: #3c3752; }
+  .btn.sm { padding: 10px 16px; font-size: 14px; }
+
+  /* hero */
+  .hero { padding-top: 56px; padding-bottom: 24px; text-align: center; }
+  @media (min-width: 720px) { .hero { padding-top: 84px; padding-bottom: 32px; } }
+  .trophy {
+    display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px 8px 12px; border-radius: 999px;
+    background: linear-gradient(180deg, rgba(48, 32, 10, .9), rgba(26, 18, 6, .9));
+    border: 1px solid rgba(255, 176, 46, .75); color: var(--gold-ink);
+    font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; text-decoration: none;
+    box-shadow: 0 0 24px rgba(255, 150, 30, .25);
+  }
+  .trophy b { color: #fff3d6; white-space: nowrap; }
+  .trophy .short { display: none; }
+  @media (max-width: 560px) { .trophy .long { display: none; } .trophy .short { display: inline; } }
+  .trophy .sep { color: var(--accent); }
+  h1 {
+    margin: 22px auto 0; max-width: 900px; font-weight: 900; letter-spacing: -.035em; line-height: 1.02;
+    font-size: clamp(40px, 8vw, 84px);
+  }
+  .lead { margin: 22px auto 0; max-width: 640px; color: var(--mute); font-size: clamp(17px, 2.2vw, 20px); }
+  .lead b { color: var(--ink); font-weight: 600; }
+  .ctas { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+  .micro { margin-top: 14px; color: var(--mute); font-size: 14px; }
+
+  .film { margin: 44px auto 0; max-width: 1040px; position: relative; }
+  .film .frame {
+    position: relative; border-radius: 22px; overflow: hidden; background: #000;
+    border: 1px solid rgba(177, 76, 255, .35);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 30px 80px rgba(0, 0, 0, .6), 0 0 90px rgba(177, 76, 255, .22);
+    aspect-ratio: 16 / 9;
+  }
+  .film video { width: 100%; height: 100%; object-fit: cover; }
+  .film .sound {
+    position: absolute; right: 14px; bottom: 14px; z-index: 2;
+    background: rgba(11, 10, 16, .78); border: 1px solid rgba(255, 255, 255, .14); color: var(--ink);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .film .cap { margin-top: 12px; color: var(--mute); font-size: 13px; text-align: center; }
+
+  /* sections */
+  section { padding: 72px 0; }
+  @media (min-width: 720px) { section { padding: 100px 0; } }
+  .eyebrow { color: var(--glow); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; font-size: 13px; }
+  h2 { margin: 10px 0 0; font-weight: 900; letter-spacing: -.03em; line-height: 1.05; font-size: clamp(32px, 5vw, 54px); }
+  .sub { color: var(--mute); max-width: 640px; margin: 16px 0 0; font-size: 18px; }
+  .center { text-align: center; }
+  .center .sub { margin-left: auto; margin-right: auto; }
+
+  /* how it works */
+  .steps { margin-top: 48px; display: grid; gap: 28px 20px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 960px) { .steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .step { text-align: left; }
+  .phone {
+    position: relative; aspect-ratio: 392 / 852; border-radius: 30px; padding: 7px; background: #05040a;
+    border: 1px solid #2f2b40; box-shadow: 0 20px 50px rgba(0, 0, 0, .55), 0 0 40px rgba(177, 76, 255, .12);
+    max-width: 250px; margin: 0 auto;
+  }
+  .phone video { width: 100%; height: 100%; object-fit: cover; border-radius: 23px; background: #0b0a10; }
+  .step .n { margin-top: 18px; color: var(--accent); font-weight: 800; font-size: 13px; letter-spacing: .14em; }
+  .step h3 { margin: 4px 0 6px; font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
+  .step p { margin: 0; color: var(--mute); font-size: 15px; line-height: 1.5; }
+  @media (max-width: 520px) { .steps { gap: 26px 14px; } .phone { border-radius: 24px; padding: 5px; } .phone video { border-radius: 19px; } .step h3 { font-size: 17px; } .step p { font-size: 14px; } }
+
+  /* feature rows */
+  .rows { display: grid; gap: 72px; margin-top: 8px; }
+  .row { display: grid; gap: 28px; align-items: center; }
+  @media (min-width: 900px) {
+    .row { grid-template-columns: 1.25fr 1fr; gap: 56px; }
+    .row.flip > .media { order: 2; }
+  }
+  .media .clip {
+    border-radius: var(--radius); overflow: hidden; aspect-ratio: 16 / 9; background: #000;
+    border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+  }
+  .media .clip video { width: 100%; height: 100%; object-fit: cover; }
+  .row h3 { margin: 10px 0 0; font-size: clamp(26px, 3.4vw, 38px); font-weight: 900; letter-spacing: -.02em; line-height: 1.1; }
+  .row p { color: var(--mute); margin: 14px 0 0; }
+  .ticks { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 10px; }
+  .ticks li { position: relative; padding-left: 28px; color: var(--ink); font-size: 16px; }
+  .ticks li::before { content: ""; position: absolute; left: 2px; top: .45em; width: 14px; height: 14px; border-radius: 4px; background: var(--accent); box-shadow: 0 0 12px rgba(255, 106, 0, .55); }
+
+  /* privacy */
+  .pillars { margin-top: 44px; display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 980px) { .pillars { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .pillar { background: linear-gradient(180deg, rgba(31, 28, 43, .85), rgba(22, 20, 31, .85)); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+  .pillar .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; background: rgba(177, 76, 255, .14); border: 1px solid rgba(177, 76, 255, .35); }
+  .pillar h4 { margin: 14px 0 6px; font-size: 18px; font-weight: 800; }
+  .pillar p { margin: 0; color: var(--mute); font-size: 15px; line-height: 1.55; }
+  .privacy-clip { margin-top: 48px; }
+
+  /* numbers */
+  .nums { display: grid; gap: 1px; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-top: 40px; }
+  @media (min-width: 860px) { .nums { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .num { background: var(--panel); padding: 26px 22px; }
+  .num .v { font-size: clamp(30px, 4vw, 44px); font-weight: 900; letter-spacing: -.03em; line-height: 1; }
+  .num .v small { font-size: .55em; color: var(--mute); font-weight: 700; }
+  .num .l { margin-top: 10px; color: var(--mute); font-size: 14px; line-height: 1.45; }
+
+  /* run your own */
+  .code {
+    margin-top: 32px; background: #07060b; border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px; overflow-x: auto; font: 500 14.5px/1.75 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: #d9d2e9;
+  }
+  .code .c { color: #6f6886; }
+  .code .p { color: var(--accent); user-select: none; }
+
+  /* team */
+  .team { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 14px; }
+  .person { display: flex; align-items: center; gap: 12px; padding: 10px 16px 10px 10px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); text-decoration: none; }
+  .person:hover { border-color: #3c3752; }
+  .person img { width: 40px; height: 40px; border-radius: 50%; background: var(--panel2); }
+  .person b { display: block; font-size: 15px; }
+  .person span { display: block; color: var(--mute); font-size: 13px; }
+  .story { display: grid; gap: 16px; margin-top: 36px; }
+  @media (min-width: 860px) { .story { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  /* final cta */
+  .final { text-align: center; padding-top: 90px; padding-bottom: 110px; }
+  .final .ghost-big { font-size: 64px; filter: drop-shadow(0 0 26px rgba(177, 76, 255, .8)); }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--mute); font-size: 13.5px; }
+  footer .wrap { display: grid; gap: 10px; }
+  footer a { color: var(--ink); }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .btn { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="HAUNT home"><span aria-hidden="true">👻</span>HAUNT</a>
+    <nav aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#run">Run your own</a>
+      <a href="https://github.com/mthomas100/haunt">GitHub</a>
+    </nav>
+    <a class="btn primary sm cta-small" href="https://aura-haunt.fly.dev">Try it live</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <a class="trophy" href="https://strangerbuilds.com"><span aria-hidden="true">🏆</span><b>Top 3</b><span class="sep" aria-hidden="true">·</span><span class="long">Stranger Builds Halloween Hackathon 2026</span><span class="short">Stranger Builds 2026</span></a>
+    <h1>Point your phone at someone. <span class="accent">Know who they are.</span></h1>
+    <p class="lead">Opt-in face recognition for events, <b>running entirely on the phone</b>. Everyone who wants to be found signs up with a selfie. Then any phone in the room can find them, and <b>haunt</b> them.</p>
+    <div class="ctas">
+      <a class="btn primary" href="https://aura-haunt.fly.dev">Try it live <span aria-hidden="true">→</span></a>
+      <a class="btn ghost" href="https://github.com/mthomas100/haunt">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+    <p class="micro">No app to install. One link for iOS Safari and Android Chrome.</p>
+
+    <div class="film" id="film">
+      <div class="frame">
+        <video id="promo" src="media/haunt-promo.mp4" poster="media/haunt-promo.jpg" autoplay muted loop playsinline preload="auto" aria-label="The HAUNT film: sign up, hunt, haunt, the big screen, and privacy, in 60 seconds"></video>
+        <button class="btn sm sound" id="sound" type="button" aria-pressed="false"><span aria-hidden="true">🔊</span> Watch with sound</button>
+      </div>
+      <p class="cap">60 seconds. Every person in this film is AI-generated; the app, the code and the recordings are real.</p>
+    </div>
+  </div>
+
+  <section id="how">
+    <div class="wrap center">
+      <div class="eyebrow">How it works</div>
+      <h2>Four taps from <span class="glowtxt">stranger</span> to <span class="accent">connection</span>.</h2>
+      <p class="sub">A room full of builders, and you know none of their names. HAUNT fixes the first ten seconds of every conversation.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="phone"><video data-src="media/phone-signup.mp4" poster="media/phone-signup.jpg" muted loop playsinline preload="none" aria-label="Signing up: name, GitHub, a costume, three selfies, consent"></video></div>
+          <div class="n">01</div>
+          <h3>Sign up in a minute</h3>
+          <p>Scan the QR. Name, GitHub, a costume, three selfies, tick consent. Or sign in with LinkedIn and your photo is the selfie.</p>
+        </div>
+        <div class="step">
+          <div class="phone"><video data-src="media/phone-hunt.mp4" poster="media/phone-hunt.jpg" muted loop playsinline preload="none" aria-label="Hunting: the camera recognizes Theo, draws his vampire costume and shows his card"></video></div>
+          <div class="n">02</div>
+          <h3>Point your phone</h3>
+          <p>The camera finds them, paints the costume they picked onto their face, and opens their card. Tap Haunt.</p>
+        </div>
+        <div class="step">
+          <div class="phone"><video data-src="media/phone-haunted.mp4" poster="media/phone-haunted.jpg" muted loop playsinline preload="none" aria-label="Theo's phone: you've been haunted by Priya, Haunt back"></video></div>
+          <div class="n">03</div>
+          <h3>Their phone shrieks</h3>
+          <p>Sound, a flash and a buzz, with who found them. One tap on Haunt back and you're even.</p>
+        </div>
+        <div class="step">
+          <div class="phone"><video data-src="media/phone-vanish.mp4" poster="media/phone-vanish.jpg" muted loop playsinline preload="none" aria-label="Nadia turns Findable off and the hunter's phone stops naming her"></video></div>
+          <div class="n">04</div>
+          <h3>Gone in one tap</h3>
+          <p>Had enough? Turn Findable off and every phone in the room stops naming you, at once.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" style="padding-top:0">
+    <div class="wrap">
+      <div class="rows">
+        <div class="row">
+          <div class="media"><div class="clip"><video data-src="media/hunt.mp4" poster="media/hunt.jpg" muted loop playsinline preload="none" aria-label="A vampire costume lens on Theo, his card, the haunt and the haunt back"></video></div></div>
+          <div>
+            <div class="eyebrow">Costume lenses</div>
+            <h3>Your costume, drawn on your face. <span class="accent">On their phone.</span></h3>
+            <p>Pick Vampire, Witch, Demon, Ghost, Skeleton or Pumpkin. When someone finds you, their phone tracks your face at camera rate and paints it: glowing irises that blink with you, fangs that show when you open your mouth, 3D bats circling your head.</p>
+            <ul class="ticks">
+              <li>468-point face mesh, MediaPipe + WebGL</li>
+              <li>Runs on the hunter's phone, never in a cloud</li>
+              <li>Only people who opted in can wear one</li>
+            </ul>
+          </div>
+        </div>
+        <div class="row flip">
+          <div class="media"><div class="clip"><video data-src="media/screen.mp4" poster="media/screen.jpg" muted loop playsinline preload="none" aria-label="The big screen: live feed of haunts, counters, most haunted, join QR"></video></div></div>
+          <div>
+            <div class="eyebrow">The big screen</div>
+            <h3>The room <span class="accent">plays along.</span></h3>
+            <p>Put <code>/screen</code> on the venue TV: a live feed of who haunted whom, most haunted, top hunters, and one QR code to join. Every haunt lands on it the moment it happens.</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="media"><div class="clip"><video data-src="media/afterwards.mp4" poster="media/afterwards.jpg" muted loop playsinline preload="none" aria-label="Tonight's connections: everyone you found and who found you"></video></div></div>
+          <div>
+            <div class="eyebrow">Afterwards</div>
+            <h3>Leave with <span class="accent">everyone you met.</span></h3>
+            <p>Your card keeps tonight's connections: who you found and who found you, with their GitHub and LinkedIn. One tap copies the list. And a matchmaking agent, the Scout, sends you clues about people you should meet, never their names.</p>
+            <ul class="ticks">
+              <li>Sign in with GitHub, LinkedIn, Google or Apple</li>
+              <li>Snap mode for Apple Vision Pro</li>
+              <li>Organizer tools: admin, bulk enroll, calibration</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy" style="background:linear-gradient(180deg, transparent, rgba(22,20,31,.55) 18%, rgba(22,20,31,.55) 82%, transparent)">
+    <div class="wrap center">
+      <div class="eyebrow">Privacy first</div>
+      <h2>Nobody has to <span class="accent">trust it.</span></h2>
+      <p class="sub">A face-recognition app at a party only works if the rules are enforced in code, not in a policy nobody reads.</p>
+      <div class="pillars" style="text-align:left">
+        <div class="pillar"><div class="ic" aria-hidden="true">📱</div><h4>Matching runs on the phone</h4><p>Detector, landmarks, an aligned crop and a 7 MB open-source embedder in WebAssembly. Video never leaves the device.</p></div>
+        <div class="pillar"><div class="ic" aria-hidden="true">✋</div><h4>Opt-in, enforced by the server</h4><p>Phones only ever receive the signatures of people who ticked consent. It's a server-side filter, not a UI checkbox.</p></div>
+        <div class="pillar"><div class="ic" aria-hidden="true">❔</div><h4>Strangers stay strangers</h4><p>A face that isn't registered shows as "unknown". Never named, never stored.</p></div>
+        <div class="pillar"><div class="ic" aria-hidden="true">🔌</div><h4>A kill switch that works</h4><p>Turn Findable off and you vanish from every open phone instantly, pushed over a WebSocket.</p></div>
+        <div class="pillar"><div class="ic" aria-hidden="true">🚫</div><h4>No face goes to an AI model</h4><p>No image or face signature is ever sent to a hosted model. The agents work from events and profiles only.</p></div>
+        <div class="pillar"><div class="ic" aria-hidden="true">🗑️</div><h4>Built to be deleted</h4><p>The server keeps 512-number signatures, cards and events in one file. Delete it after the event.</p></div>
+      </div>
+      <div class="media privacy-clip"><div class="clip"><video data-src="media/privacy.mp4" poster="media/privacy.jpg" muted loop playsinline preload="none" aria-label="Strangers stay unknown; Nadia turns Findable off and disappears from Priya's phone"></video></div></div>
+
+      <div class="nums" style="text-align:left">
+        <div class="num"><div class="v">≤ 0.36</div><div class="l">highest similarity between two different people in testing</div></div>
+        <div class="num"><div class="v">0.47–0.79</div><div class="l">the same person, across photos taken years apart</div></div>
+        <div class="num"><div class="v">0.40</div><div class="l">to show a name, after winning three frames in a row; below it, "unknown"</div></div>
+        <div class="num"><div class="v">512</div><div class="l">numbers per face. The only thing about your face the server ever sees</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="run">
+    <div class="wrap">
+      <div class="eyebrow">Open source</div>
+      <h2>Run your own <span class="accent">haunted house.</span></h2>
+      <p class="sub">One Node process, plain ES modules, no build step. Deploys to Fly.io in one command for about $2 a month.</p>
+<pre class="code"><span class="p">$ </span>git clone https://github.com/mthomas100/haunt && cd haunt
+<span class="p">$ </span>npm install
+<span class="p">$ </span>npm start        <span class="c"># http://localhost:3000</span>
+<span class="p">$ </span>npm run tunnel   <span class="c"># phones need HTTPS for the camera</span>
+<span class="p">$ </span>npm test         <span class="c"># API, pushes, consent filter, kill switch</span></pre>
+      <div class="ctas" style="justify-content:flex-start">
+        <a class="btn ghost" href="https://github.com/mthomas100/haunt#run-your-own">Setup guide</a>
+        <a class="btn ghost" href="https://github.com/mthomas100/haunt/blob/main/ARCHITECTURE.md">Architecture</a>
+        <a class="btn ghost" href="https://github.com/mthomas100/haunt/blob/main/docs/DEPLOY.md">Deploy</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="team" style="padding-top:0">
+    <div class="wrap">
+      <div class="eyebrow">Built at Stranger Builds</div>
+      <h2>One day. Three people. <span class="glowtxt">A crew of agents.</span></h2>
+      <p class="sub">HAUNT was built on October 31, 2026 at Stranger Builds, a Halloween hackathon, and placed in the top 3.</p>
+      <div class="team">
+        <a class="person" href="https://github.com/mthomas100"><img src="https://github.com/mthomas100.png?size=80" alt="" loading="lazy" width="40" height="40"><span><b>Matthew Thomas</b><span>@mthomas100</span></span></a>
+        <a class="person" href="https://github.com/tarecq"><img src="https://github.com/tarecq.png?size=80" alt="" loading="lazy" width="40" height="40"><span><b>tarecq</b><span>@tarecq</span></span></a>
+        <a class="person" href="https://github.com/chaltenio"><img src="https://github.com/chaltenio.png?size=80" alt="" loading="lazy" width="40" height="40"><span><b>chaltenio</b><span>@chaltenio</span></span></a>
+      </div>
+      <div class="story">
+        <div class="pillar"><div class="ic" aria-hidden="true">🤖</div><h4>Built with agents</h4><p>Several Claude Code sessions worked in parallel, one branch each, kept in sync by a GitHub-issue message bus and an integrator agent that landed every branch.</p></div>
+        <div class="pillar"><div class="ic" aria-hidden="true">🎬</div><h4>A film with no real faces</h4><p>Simulated attendees ran the real pages in headless Chrome, each with a fake camera, and every phone was recorded. The cast is AI-generated.</p></div>
+        <div class="pillar"><div class="ic" aria-hidden="true">🧪</div><h4>Tested end to end</h4><p>The smoke test boots the server and checks the API, the pushes, the consent filter, the kill switch, costumes and the Scout.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap final">
+    <div class="ghost-big" aria-hidden="true">👻</div>
+    <h2>Go haunt someone.</h2>
+    <p class="sub" style="margin-left:auto;margin-right:auto">Open it on your phone, sign up in a minute, and point it at a friend who did the same.</p>
+    <div class="ctas">
+      <a class="btn primary" href="https://aura-haunt.fly.dev">Try it live <span aria-hidden="true">→</span></a>
+      <a class="btn ghost" href="https://github.com/mthomas100/haunt">Star it on GitHub</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>🏆 Top 3 at <a href="https://strangerbuilds.com">Stranger Builds</a> Halloween Hackathon 2026 · <a href="https://github.com/mthomas100/haunt">github.com/mthomas100/haunt</a> · hackathon repo <a href="https://github.com/chaltenio/aura">chaltenio/aura</a></div>
+    <div>Every person in the videos on this page is AI-generated. The app, the code and the recordings are real, recorded on a local server.</div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const vids = [...document.querySelectorAll('video')];
+  const load = (v) => { if (v.dataset.src && !v.src) { v.src = v.dataset.src; v.load(); } };
+  const play = (v) => { load(v); const p = v.play(); if (p && p.catch) p.catch(() => { v.controls = true; }); };
+
+  if (reduce) {
+    // Respect reduced motion: nothing plays by itself; every clip gets controls.
+    vids.forEach((v) => { v.removeAttribute('autoplay'); v.pause(); v.controls = true; v.preload = 'metadata'; load(v); });
+  } else if ('IntersectionObserver' in window) {
+    // Autoplay each clip while it is on screen; pause it when it scrolls away.
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const v = e.target;
+        if (e.isIntersecting) { if (v.dataset.user !== 'paused') play(v); }
+        else if (!v.paused) v.pause();
+      });
+    }, { rootMargin: '200px 0px', threshold: 0.15 });
+    vids.forEach((v) => io.observe(v));
+  } else {
+    vids.forEach(play);
+  }
+
+  // The film: muted autoplay; one tap restarts it with sound and controls.
+  const film = document.getElementById('promo');
+  const btn = document.getElementById('sound');
+  btn.addEventListener('click', () => {
+    if (film.muted) {
+      film.muted = false; film.currentTime = 0; film.loop = false; film.controls = true; play(film);
+      btn.setAttribute('aria-pressed', 'true'); btn.innerHTML = '<span aria-hidden="true">🔇</span> Mute';
+    } else {
+      film.muted = true; btn.setAttribute('aria-pressed', 'false'); btn.innerHTML = '<span aria-hidden="true">🔊</span> Sound on';
+    }
+  });
+  film.addEventListener('ended', () => { film.loop = true; film.muted = true; play(film); btn.setAttribute('aria-pressed', 'false'); btn.innerHTML = '<span aria-hidden="true">🔊</span> Watch with sound'; });
+})();
+</script>
+</body>
+</html>
