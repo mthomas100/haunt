@@ -267,6 +267,8 @@ try {
     const cP = await waitFor(P.inbox, clue), cM = await waitFor(M.inbox, clue);
     check(cP && cM && cP.scout.matchId === cM.scout.matchId && cP.scout.deadline > Date.now(), 'scout: both sides of a complementary pair get a clue for the same match');
     check(cP && !/priya|marco/i.test(cP.scout.clue + cM.scout.clue) && /frontend|React/i.test(cP.scout.clue) && /backend|Rust/i.test(cM.scout.clue), `scout: clues describe the other person without naming them: "${cP?.scout.clue}"`);
+    const late = await listen(marco.id); const cLate = await waitFor(late.inbox, clue, 1500); late.ws.close();
+    check(cLate && cM && cLate.scout.matchId === cM.scout.matchId && cLate.scout.clue === cM.scout.clue, 'scout: a phone that connects after its clue fired gets the clue on connect');
     const evs1 = (await json('/api/events?limit=50')).data; const match = evs1.events.find((e) => e.type === 'match');
     check(match?.meta?.status === 'open' && match.meta.features.includes('complement') && match.meta.features.includes('intent_match') && match.meta.weights.stack === 0.4, 'scout: match event is open with named features and the weights it used');
     check(evs1.scout?.clues.sent >= 1 && evs1.scout.clues.pending >= 1 && evs1.scout.version === 1 && evs1.scout.predicted.n === 0, '/api/events carries the scout block for the screen');

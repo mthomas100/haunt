@@ -215,6 +215,7 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => { screens.delete(ws); if (attendee) sockets.get(attendee)?.delete(ws); });
   ws.on('message', () => {}); // clients only listen
   ws.send(JSON.stringify({ type: 'hello', attendees: db.attendees.filter((a) => a.consent).length }));
+  if (attendee) scout.resend(attendee); // a Scout clue that fired before this phone connected
 });
 function sendTo(id, msg) { for (const ws of sockets.get(id) || []) if (ws.readyState === 1) ws.send(JSON.stringify(msg)); }
 function broadcast(msg) { const s = JSON.stringify(msg); for (const ws of wss.clients) if (ws.readyState === 1) ws.send(s); }

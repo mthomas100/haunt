@@ -232,5 +232,13 @@ export function mountScout(app, { db, byId, save, sendTo, broadcastScreen, publi
     setInterval(() => { try { watch(); } catch {} }, 1000).unref();
   }
   for (const h of haunts()) seenHaunts.add(h.id); // haunts from before this boot are not confirmations
-  return { sweep, confirm, state, review, watch };
+  /** A phone that connects after its clue fired (page opened later, a reconnect) gets the clue again, until its deadline. */
+  function resend(id, now = Date.now()) {
+    for (const m of matches()) {
+      if (m.meta.status !== 'open' || !(m.meta.deadline > now) || (m.actorId !== id && m.targetId !== id)) continue;
+      sendTo(id, { type: 'state', scout: { phase: 'clue', matchId: m.id, clue: m.actorId === id ? m.meta.clueA : m.meta.clueB, deadline: m.meta.deadline, round: m.meta.round } });
+    }
+  }
+
+  return { sweep, confirm, state, review, watch, resend };
 }
