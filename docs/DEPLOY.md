@@ -2,7 +2,7 @@
 
 Host: **Fly.io**. One Node machine, WebSockets, a 1 GB volume for `data/`, HTTPS out of the box.
 Why Fly: the Dockerfile and `fly.toml` are all it needs, Fly builds remotely (no local Docker), WebSockets and
-persistent volumes work on the cheapest machine (shared-cpu-1x, about $2 to 3 a month), and the whole deploy is one
+persistent volumes work on the cheapest machine (shared-cpu-1x; see "Costs and caps"), and the whole deploy is one
 command. Railway works too (`railway up`). Free tiers that sleep or have no disk are out for a live event.
 
 ## 5-minute path
@@ -57,5 +57,24 @@ tests, not for the event.
 ## What runs where
 
 - One machine, `PORT=3000`, `DATA_DIR=/data` (the volume). The store is `/data/db.json`; delete it after the event.
+- The machine stops when nobody is connected and the next visit starts it (a cold start of a second or two).
 - FaceX weights are baked into the image at build time (Dockerfile), so cold starts download nothing.
 - Secrets reach the app as Fly secrets (`fly secrets list -a <app>`), never as files in the image or the repo.
+
+## Costs and caps
+
+Fly has no spending limit, so the caps live in `fly.toml` and the server:
+
+- **The machine** stops when idle and Fly never adds machines by itself (`auto_stop_machines = "stop"`,
+  `min_machines_running = 0`). Awake all month, a shared-cpu-1x 512 MB machine is about $4.41 in sjc.
+- **Outbound data** is the one Fly cost with no ceiling of its own, and a phone's first visit pulls about 8 MB of face
+  weights. `server/bandwidth.js` counts every byte the server writes (HTTP and WebSocket) per calendar month (UTC) in
+  `data/bandwidth.json`. Past `BANDWIDTH_CAP_GB` (fly.toml, default 10) every request except `GET /api/version` gets
+  503 with `Retry-After`, and new sockets are refused until the 1st.
+- **Worst month:** machine $4.41 + volume $0.15 + 10 GB of data ($0.20 to North America and Europe, $1.20 to Africa
+  and India): **under $6**. Nothing else the app uses bills by usage; sign-in providers and the GitHub API are free.
+
+Check it with `curl -s https://<app>.fly.dev/api/version | jq .bandwidth` (this month's data against the cap) and
+`fly machine list -a <app>` (`started` or `stopped`). For a bigger event raise `BANDWIDTH_CAP_GB`; to keep the machine
+warm during the event set `min_machines_running = 1` for the night. `fly scale count 0` turns it off and keeps the data.
+

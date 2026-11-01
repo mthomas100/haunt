@@ -144,7 +144,8 @@ npm test            # smoke test: API, pushes, consent filter, kill switch, cost
 
 Then open `/register` on one phone, `/hunt` on another, and `/screen` on a laptop or TV.
 
-- **Deploy** to Fly.io in one command for about $2 to 3 a month: [docs/DEPLOY.md](docs/DEPLOY.md).
+- **Deploy** to Fly.io in one command: [docs/DEPLOY.md](docs/DEPLOY.md). The machine sleeps when idle and a monthly
+  data cap keeps the worst month under $6.
 - **Configure** sign-in providers and the admin token: [.env.example](.env.example) and [docs/OAUTH_SETUP.md](docs/OAUTH_SETUP.md).
   Everything is optional; with no keys you get the name + selfie path and no sign-in buttons.
 - **Run the event**: the two-minute demo script and the questions people ask are in [docs/DEMO.md](docs/DEMO.md).
