@@ -1,0 +1,32 @@
+# dependencies / builds
+node_modules/
+dist/
+build/
+.cache/
+
+# env & secrets: only .env.example is committed
+.env
+.env.*
+!.env.example
+*.key
+*.p8
+*.pem
+
+# model weights (fetched at build/boot from the FaceX release) and other large binaries
+*.bin
+*.onnx
+*.tflite
+*.y4m
+models/
+weights/
+
+# runtime data: the attendee store (profiles + face signatures) never goes in git
+data/
+
+# logs, local state, OS files
+*.log
+logs/
+tmp/
+.playwright-mcp/
+.DS_Store
+base44/.app.jsonc

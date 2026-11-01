@@ -1,0 +1,13 @@
+node_modules
+data
+.git
+.github
+test
+docs
+site
+promo
+scripts
+base44
+*.md
+.env
+.env.*

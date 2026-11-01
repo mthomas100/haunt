@@ -1,0 +1,27 @@
+# Fly.io config. Deploy with scripts/deploy.sh (creates app + volume, stages secrets, deploys, smoke-checks).
+# Change `app` if the name is taken on Fly; everything else reads it from here.
+app = "aura-haunt"
+primary_region = "sjc"
+
+[build]
+
+[env]
+  PORT = "3000"
+  DATA_DIR = "/data"
+  # Frontends on other origins that may call this API and get sign-in handoffs (server/cors.js): the Base44 mirror.
+  FRONTEND_ORIGINS = "https://aura-haunt.base44.app"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[mounts]]
+  source = "haunt_data"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

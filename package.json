@@ -1,0 +1,39 @@
+{
+  "name": "haunt",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Point your phone at someone in the room and know who they are. Opt-in, on-device face-to-profile for events.",
+  "homepage": "https://mthomas100.github.io/haunt/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mthomas100/haunt.git"
+  },
+  "keywords": [
+    "face-recognition",
+    "on-device",
+    "webassembly",
+    "privacy",
+    "consent",
+    "events",
+    "networking",
+    "halloween",
+    "hackathon",
+    "websocket",
+    "mobile-web"
+  ],
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "dev": "node --watch --env-file-if-exists=.env server/index.js",
+    "test": "node test/smoke.mjs",
+    "base44": "node scripts/base44.mjs",
+    "tunnel": "cloudflared tunnel --url http://localhost:3000"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.18.0"
+  }
+}
